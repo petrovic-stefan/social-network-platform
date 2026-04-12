@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36429.23 d17.14
+VisualStudioVersion = 17.14.36429.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialNetwork.API", "SocialNetwork.API\SocialNetwork.API.csproj", "{97D6774E-47FB-4DCF-9150-6204D429B42C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialNetwork.Application", "SocialNetwork.Application\SocialNetwork.Application.csproj", "{3446942F-9015-4615-84DF-A9CB66127011}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialNetwork.Domain", "SocialNetwork.Domain\SocialNetwork.Domain.csproj", "{459F9BBE-9EBD-466D-98EE-C6FCB8669F6C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialNetwork.Infrastructure", "SocialNetwork.Infrastructure\SocialNetwork.Infrastructure.csproj", "{0BF6E399-463D-49E3-B049-748CDF4AA87C}"
 EndProject
@@ -25,10 +23,6 @@ Global
 		{3446942F-9015-4615-84DF-A9CB66127011}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3446942F-9015-4615-84DF-A9CB66127011}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3446942F-9015-4615-84DF-A9CB66127011}.Release|Any CPU.Build.0 = Release|Any CPU
-		{459F9BBE-9EBD-466D-98EE-C6FCB8669F6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{459F9BBE-9EBD-466D-98EE-C6FCB8669F6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{459F9BBE-9EBD-466D-98EE-C6FCB8669F6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{459F9BBE-9EBD-466D-98EE-C6FCB8669F6C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0BF6E399-463D-49E3-B049-748CDF4AA87C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0BF6E399-463D-49E3-B049-748CDF4AA87C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BF6E399-463D-49E3-B049-748CDF4AA87C}.Release|Any CPU.ActiveCfg = Release|Any CPU

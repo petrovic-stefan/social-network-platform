@@ -10,6 +10,9 @@ import UserProfilePage from "../pages/app/UserProfilePage";
 import SettingsPage from "../pages/app/SettingsPage";
 import CreatePostPage from "../pages/app/CreatePostPage";
 import EditPostPage from "../pages/app/EditPostPage";
+import NotificationsPage from "../pages/app/NotificationsPage";
+import InboxPage from "../pages/app/InboxPage";
+import ChatConversationPage from "../pages/app/ChatConversationPage";
 
 export default function AppRouter() {
   return (
@@ -28,6 +31,9 @@ export default function AppRouter() {
             <Route path="/app/settings" element={<SettingsPage />} />
             <Route path="/app/create" element={<CreatePostPage />} />
             <Route path="/app/posts/:postId/edit" element={<EditPostPage />} />
+            <Route path="/app/notifications" element={<NotificationsPage />} />
+            <Route path="/app/messages" element={<InboxPage />} />
+            <Route path="/app/messages/:conversationId" element={<ChatConversationPage />} />
           </Route>
         </Route>
 

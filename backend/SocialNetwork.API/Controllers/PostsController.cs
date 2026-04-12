@@ -30,10 +30,9 @@ namespace SocialNetwork.API.Controllers
             return Ok(res);
         }
 
- 
         [HttpPost("multipart")]
         [Consumes("multipart/form-data")]
-        [RequestSizeLimit(5 * 1024 * 1024)] // 5MB
+        [RequestSizeLimit(5 * 1024 * 1024)] 
         public async Task<IActionResult> CreateMultipart([FromForm] CreatePostMultipartRequest req)
         {
             var userId = User.GetUserId();
@@ -41,10 +40,9 @@ namespace SocialNetwork.API.Controllers
             if (string.IsNullOrWhiteSpace(req.PostText))
                 return BadRequest(new { message = "postText is required." });
 
-            string? relativePath = null;     // npr "posts/abc.webp"
-            string? savedFileName = null;    // npr "abc.webp"
+            string? relativePath = null;     
+            string? savedFileName = null;    
 
-            
             if (req.File is not null && req.File.Length > 0)
             {
                 const long maxBytes = 5 * 1024 * 1024;
@@ -70,7 +68,6 @@ namespace SocialNetwork.API.Controllers
                 }
             }
 
-            
             try
             {
                 var res = await _posts.CreateAsync(
@@ -90,7 +87,6 @@ namespace SocialNetwork.API.Controllers
             }
             catch
             {
-                
                 if (!string.IsNullOrWhiteSpace(savedFileName))
                 {
                     var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "posts");
@@ -118,18 +114,14 @@ namespace SocialNetwork.API.Controllers
         public async Task<IActionResult> Delete(int postId)
         {
             var userId = User.GetUserId();
-
-            
             var post = await _posts.GetByIdAsync(userId, postId);
             if (post == null)
                 return NotFound();
 
             var imagePath = post.PostImg; 
 
-            
             await _posts.DeleteAsync(userId, postId);
 
-            
             _fileStorage.DeletePostImage(imagePath);
 
             return Ok(new { message = "Post deleted (soft)" });

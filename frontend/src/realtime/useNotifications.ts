@@ -17,16 +17,12 @@ export function useNotifications(onNotification?: (p: NotificationPayload) => vo
   const onNotifRef = useRef<typeof onNotification>(onNotification);
   const [connected, setConnected] = useState(false);
 
-
   useEffect(() => {
     onNotifRef.current = onNotification;
   }, [onNotification]);
 
-
   useEffect(() => {
     let disposed = false;
-
-
     if (connRef.current) return;
 
     const conn = createNotificationsConnection();

@@ -48,8 +48,14 @@ export const notificationsApi = {
     await http.post(`/api/notifications/${notificationId}/read`);
   },
 
-  async getLatest(take = 10): Promise<NotificationDto[]> {
+  async getLatest(take = 20): Promise<NotificationDto[]> {
     const res = await http.get<AnyNotification[]>(`/api/notifications?take=${take}`);
+    const raw = res.data ?? [];
+    return raw.map(mapNotification);
+  },
+
+  async getAllForPage(): Promise<NotificationDto[]> {
+    const res = await http.get<AnyNotification[]>(`/api/notifications?take=100`);
     const raw = res.data ?? [];
     return raw.map(mapNotification);
   },

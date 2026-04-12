@@ -24,7 +24,6 @@ namespace SocialNetwork.Infrastructure.Auth
         {
             using var con = _db.Create();
             Console.WriteLine(">>> RegisterAsync HIT <<<");
-            // 1) Provera da li postoji email/username
             var exists = await con.ExecuteScalarAsync<int>(
                 """
             SELECT COUNT(1)
@@ -36,11 +35,9 @@ namespace SocialNetwork.Infrastructure.Auth
             if (exists > 0)
                 throw new InvalidOperationException("Email or username already exists.");
 
-            // 2) Hash + salt
             var salt = PasswordHasher.GenerateSalt();
             var hash = PasswordHasher.Hash(req.Password, salt);
 
-            // 3) Insert (ROLES_ID = 1 pretpostavka Korisnik)
             var newUserId = await con.ExecuteScalarAsync<int>(
                 """
             INSERT INTO USERS (ROLES_ID, FIRST_NAME, LAST_NAME, EMAIL, USERNAME, GENDER, PROFILE_PIC, UPDATED_AT, USER_CREATED_AT, PASSWORD_HASH, PASSWORD_SALT)

@@ -29,7 +29,12 @@ namespace SocialNetwork.Infrastructure.Chat
             using var con = _db.Create();
             return await con.QuerySingleAsync<int>(
                 "dbo.SendMessageToConversation",
-                new { ConversationId = conversationId, FromUserId = fromUserId, Text = text },
+                new
+                {
+                    ConversationId = conversationId,
+                    FromUserId = fromUserId,
+                    MessageText = text
+                },
                 commandType: CommandType.StoredProcedure);
         }
 

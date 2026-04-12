@@ -20,7 +20,6 @@ namespace SocialNetwork.API.Middleware
             }
             catch (SqlException ex)
             {
-                
                 var (status, code) = MapSql(ex);
 
                 _logger.LogWarning(ex, "SQL error {Number}: {Message}", ex.Number, ex.Message);
@@ -36,7 +35,6 @@ namespace SocialNetwork.API.Middleware
             }
             catch (InvalidOperationException ex)
             {
-                
                 _logger.LogWarning(ex, "Invalid operation: {Message}", ex.Message);
 
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;

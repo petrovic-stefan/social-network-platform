@@ -18,8 +18,6 @@ function imgUrl(path?: string | null): string | null {
 export default function PostDetails({ post, onPostPatched }: PostDetailsProps) {
   const nav = useNavigate();
   const postId = useMemo(() => Number(post.postId), [post.postId]);
-
-  
   const onPatchedRef = useRef<PostDetailsProps["onPostPatched"]>(onPostPatched);
   useEffect(() => {
     onPatchedRef.current = onPostPatched;
@@ -31,7 +29,6 @@ export default function PostDetails({ post, onPostPatched }: PostDetailsProps) {
   const [loadingComments, setLoadingComments] = useState(true);
   const [commentsError, setCommentsError] = useState<string | null>(null);
 
-  
   useEffect(() => {
     setFullPost(post);
     setComments([]);
@@ -40,7 +37,6 @@ export default function PostDetails({ post, onPostPatched }: PostDetailsProps) {
     setLoadingComments(true);
   }, [postId, post]);
 
-  
   useEffect(() => {
     if (!postId) return;
 
@@ -55,7 +51,7 @@ export default function PostDetails({ post, onPostPatched }: PostDetailsProps) {
         setFullPost(p);
         onPatchedRef.current?.(p);
       } catch {
-        
+        // ostavi bar feed post
         if (!cancelled) setFullPost(post);
       } finally {
         if (!cancelled) setLoadingPost(false);
@@ -67,7 +63,6 @@ export default function PostDetails({ post, onPostPatched }: PostDetailsProps) {
     };
   }, [postId, post]);
 
-  
   useEffect(() => {
     if (!postId) return;
 
@@ -85,7 +80,6 @@ export default function PostDetails({ post, onPostPatched }: PostDetailsProps) {
       } catch (err) {
         if (cancelled) return;
 
-        
         const ax = err as AxiosError;
         const status = ax.response?.status;
 

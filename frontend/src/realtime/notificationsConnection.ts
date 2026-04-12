@@ -7,7 +7,6 @@ export function createNotificationsConnection() {
   const conn = new signalR.HubConnectionBuilder()
     .withUrl(HUB_URL, {
       accessTokenFactory: () => localStorage.getItem(TOKEN_KEY) ?? "",
-      
     })
     .withAutomaticReconnect([0, 1000, 3000, 8000])
     .configureLogging(signalR.LogLevel.Information)

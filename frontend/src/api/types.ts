@@ -24,7 +24,7 @@ export type PostDto = {
   profilePic: string | null;
   content: string | null;
   postImg: string | null;
-  createdAt: string; 
+  createdAt: string; // BITNO: string
   likeCount: number;
   commentCount: number;
   isLikedByMe: boolean;

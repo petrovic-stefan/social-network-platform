@@ -1,0 +1,96 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>ChatHub test</title>
+</head>
+<body>
+    <h3>ChatHub test</h3>
+
+    <div>
+        <label>API base (https):</label>
+        <input id="base" value="https://localhost:7248" style="width:320px" />
+    </div>
+
+    <div>
+        <label>JWT token:</label>
+        <input id="token" style="width:900px" placeholder="paste accessToken here" />
+    </div>
+
+    <div style="margin-top:10px">
+        <button id="connect">Connect</button>
+        <button id="disconnect">Disconnect</button>
+    </div>
+
+    <hr />
+
+    <div>
+        <label>conversationId:</label>
+        <input id="convId" value="1" />
+        <label>text:</label>
+        <input id="text" value="Poruka iz HTML testa ✅" style="width:360px" />
+        <button id="send">Send via API</button>
+    </div>
+
+    <pre id="log" style="margin-top:15px; background:#111; color:#0f0; padding:10px; height:300px; overflow:auto"></pre>
+
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@8.0.7/dist/browser/signalr.min.js"></script>
+    <script>
+        let connection;
+
+        function log(msg) {
+            const el = document.getElementById("log");
+            el.textContent += msg + "\n";
+            el.scrollTop = el.scrollHeight;
+        }
+
+        document.getElementById("connect").onclick = async () => {
+            const base = document.getElementById("base").value.trim();
+            const token = document.getElementById("token").value.trim();
+
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl(`${base}/hubs/chat`, {
+                    accessTokenFactory: () => token
+                })
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("chat:message", payload => {
+                log("RECEIVED chat:message => " + JSON.stringify(payload));
+            });
+
+            connection.onreconnecting(() => log("Reconnecting..."));
+            connection.onreconnected(() => log("Reconnected."));
+            connection.onclose(() => log("Disconnected."));
+
+            await connection.start();
+            log("Connected to ChatHub ✅");
+        };
+
+        document.getElementById("disconnect").onclick = async () => {
+            if (connection) await connection.stop();
+        };
+
+        document.getElementById("send").onclick = async () => {
+            const base = document.getElementById("base").value.trim();
+            const token = document.getElementById("token").value.trim();
+            const conversationId = document.getElementById("convId").value.trim();
+            const text = document.getElementById("text").value;
+
+            const res = await fetch(`${base}/api/chat/${conversationId}/messages`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify({ text })
+            });
+
+            const raw = await res.text();
+            log("SEND status => " + res.status);
+            log("SEND body => " + raw);
+
+        };
+    </script>
+</body>
+</html>

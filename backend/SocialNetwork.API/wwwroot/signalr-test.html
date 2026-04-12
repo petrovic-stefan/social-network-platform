@@ -1,0 +1,111 @@
+﻿<!doctype html>
+<html lang="sr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SignalR Notifications Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 16px;
+        }
+
+        input, button {
+            padding: 8px;
+            margin: 4px 0;
+            width: 100%;
+            max-width: 720px;
+        }
+
+        pre {
+            background: #111;
+            color: #0f0;
+            padding: 12px;
+            border-radius: 8px;
+            max-width: 720px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <h2>SignalR Notifications Test</h2>
+
+    <p>1) Nalepi JWT token (bez "Bearer")</p>
+    <input id="token" placeholder="JWT token..." />
+
+    <button id="connect">Connect</button>
+    <button id="disconnect" disabled>Disconnect</button>
+
+    <p>Status: <b id="status">disconnected</b></p>
+
+    <pre id="log"></pre>
+
+    <!-- SignalR browser client -->
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@8.0.7/dist/browser/signalr.min.js"></script>
+    <script>
+    const logEl = document.getElementById("log");
+    const statusEl = document.getElementById("status");
+    const tokenEl = document.getElementById("token");
+    const btnConnect = document.getElementById("connect");
+    const btnDisconnect = document.getElementById("disconnect");
+
+    let connection = null;
+
+    function log(msg) {
+      const line = `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+      logEl.textContent = line + logEl.textContent;
+      console.log(msg);
+    }
+
+    btnConnect.addEventListener("click", async () => {
+      const token = tokenEl.value.trim();
+      if (!token) return alert("Nalepi JWT token.");
+
+      // koristi ISTI host/port gde ti radi API (swagger)
+      const hubUrl = `${location.origin}/hubs/notifications?access_token=${encodeURIComponent(token)}`;
+
+      connection = new signalR.HubConnectionBuilder()
+        .withUrl(hubUrl)
+        .withAutomaticReconnect()
+        .build();
+
+      connection.on("notification", (payload) => {
+        log("📩 notification: " + JSON.stringify(payload));
+      });
+
+      connection.onreconnecting(() => {
+        statusEl.textContent = "reconnecting...";
+        log("...reconnecting");
+      });
+
+      connection.onreconnected(() => {
+        statusEl.textContent = "connected";
+        log("✅ reconnected");
+      });
+
+      connection.onclose(() => {
+        statusEl.textContent = "disconnected";
+        btnConnect.disabled = false;
+        btnDisconnect.disabled = true;
+        log("❌ disconnected");
+      });
+
+      try {
+        await connection.start();
+        statusEl.textContent = "connected";
+        btnConnect.disabled = true;
+        btnDisconnect.disabled = false;
+        log("✅ connected to " + hubUrl);
+      } catch (e) {
+        log("ERROR: " + e);
+        alert("Ne mogu da se konektujem. Pogledaj console/log.");
+      }
+    });
+
+    btnDisconnect.addEventListener("click", async () => {
+      if (!connection) return;
+      await connection.stop();
+    });
+    </script>
+</body>
+</html>

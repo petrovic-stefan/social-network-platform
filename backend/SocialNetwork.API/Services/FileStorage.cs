@@ -16,7 +16,6 @@ namespace SocialNetwork.API.Services
             if (string.IsNullOrWhiteSpace(relativePath))
                 return;
 
-            
             var fullPath = Path.Combine(
                 _env.WebRootPath,
                 "uploads",

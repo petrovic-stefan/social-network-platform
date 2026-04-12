@@ -9,7 +9,6 @@ namespace SocialNetwork.API.Hubs;
 [Authorize]
 public sealed class ChatHub : Hub
 {
-    // userId -> set(connectionIds)
     private static readonly ConcurrentDictionary<int, ConcurrentDictionary<string, byte>> _connections = new();
     private static readonly ConcurrentDictionary<int, DateTime> _lastSeen = new();
     private static readonly ConcurrentDictionary<(int fromUserId, int peerUserId, int conversationId), DateTime> _typingLast = new();
@@ -24,15 +23,11 @@ public sealed class ChatHub : Hub
     public override async Task OnConnectedAsync()
     {
         var userId = GetUserIdOrThrow();
-
-        
         var set = _connections.GetOrAdd(userId, _ => new ConcurrentDictionary<string, byte>());
         set.TryAdd(Context.ConnectionId, 0);
 
-        
         await Groups.AddToGroupAsync(Context.ConnectionId, $"user:{userId}");
 
-        
         var peers = await _presence.GetPeersAsync(userId);
         foreach (var peerId in peers)
         {
@@ -44,8 +39,6 @@ public sealed class ChatHub : Hub
                     lastSeen = (DateTime?)null
                 });
         }
-
-      
         var onlinePeers = peers
             .Where(pid => _connections.TryGetValue(pid, out var s) && !s.IsEmpty)
             .ToArray();
@@ -67,13 +60,9 @@ public sealed class ChatHub : Hub
             await base.OnDisconnectedAsync(exception);
             return;
         }
-
-       
         if (_connections.TryGetValue(userId.Value, out var set))
         {
             set.TryRemove(Context.ConnectionId, out _);
-
-            
             if (set.IsEmpty)
             {
                 var now = DateTime.UtcNow;
@@ -96,7 +85,6 @@ public sealed class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    
     public Task Ping()
         => Clients.Caller.SendAsync("chat:pong", new { ts = DateTime.UtcNow });
 
@@ -105,7 +93,6 @@ public sealed class ChatHub : Hub
         
         var idStr = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier)
                     ?? Context.User?.FindFirstValue("sub"); 
-
         if (!int.TryParse(idStr, out var userId) || userId <= 0)
             throw new HubException("Unauthorized");
 
@@ -116,7 +103,6 @@ public sealed class ChatHub : Hub
     {
         var idStr = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier)
                     ?? Context.User?.FindFirstValue("sub");
-
         if (!int.TryParse(idStr, out var userId) || userId <= 0)
             return null;
 
@@ -125,8 +111,6 @@ public sealed class ChatHub : Hub
     public async Task Typing(int conversationId, int peerUserId, bool isTyping)
     {
         var fromUserId = GetUserIdOrThrow();
-
-      
         await Clients.Group($"user:{peerUserId}")
             .SendAsync("chat:typing", new
             {

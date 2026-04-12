@@ -30,12 +30,8 @@ function mapComment(x: RawPostCommentDto): PostCommentDto {
 
 export async function getFeed(take = 10, before?: string) {
   const res = await http.get<PostDto[]>("/api/posts/feed", {
-    params: {
-      take,
-      before,
-    },
+    params: { take, before },
   });
-
   return res.data;
 }
 
@@ -72,4 +68,8 @@ export async function deletePost(postId: number) {
 
 export async function updatePost(postId: number, postText: string) {
   await http.put(`/api/posts/${postId}`, { postText });
+}
+
+export async function deleteComment(commentId: number) {
+  await http.delete(`/api/comments/${commentId}`);
 }

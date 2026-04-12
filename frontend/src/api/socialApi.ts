@@ -1,4 +1,3 @@
-// src/api/socialApi.ts
 import { http } from "./http";
 
 export async function follow(toUserId: number): Promise<{ message: string }> {

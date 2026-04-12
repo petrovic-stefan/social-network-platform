@@ -19,7 +19,7 @@ namespace SocialNetwork.Infrastructure.Posts
         {
             using var con = _db.Create();
 
-            var newId = await con.ExecuteScalarAsync<decimal>( // SCOPE_IDENTITY vraća decimal
+            var newId = await con.ExecuteScalarAsync<decimal>( 
                 "dbo.AddPost",
                 new { UserId = userId, req.PostText, req.PostImg },
                 commandType: CommandType.StoredProcedure);

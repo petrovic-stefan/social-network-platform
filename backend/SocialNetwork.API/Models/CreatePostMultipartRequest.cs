@@ -6,7 +6,6 @@ namespace SocialNetwork.API.Models
     {
         [FromForm(Name = "postText")]
         public string PostText { get; set; } = "";
-
         [FromForm(Name = "file")]
         public IFormFile? File { get; set; }
     }

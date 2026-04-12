@@ -39,6 +39,7 @@ export default function RegisterPage() {
     setAccessToken(res.accessToken);
     navigate("/app");
   } catch (e: unknown) {
+    // ako backend vrati validation errors, ovo će ih lepo prikazati
     const maybeAxios = e as { response?: { data?: unknown } };
     setError(
       maybeAxios?.response?.data

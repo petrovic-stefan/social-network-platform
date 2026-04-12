@@ -10,9 +10,9 @@ namespace SocialNetwork.API.Controllers;
 public class FilesController : ControllerBase
 {
     private static readonly string[] AllowedExt = { ".jpg", ".jpeg", ".png", ".webp" };
-    private const long MaxBytes = 5 * 1024 * 1024; // 5MB
+    private const long MaxBytes = 5 * 1024 * 1024; 
 
-    // Upload za PROFILE slike (profiles folder)
+    
     [HttpPost("upload-profile")]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(MaxBytes)]

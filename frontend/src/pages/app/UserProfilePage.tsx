@@ -139,13 +139,37 @@ export default function UserProfilePage() {
             Edit Profile
           </Button>
         ) : (
-          <Button
-            onClick={toggleFollow}
-            disabled={followBusy}
-            variant={profile.isFollowedByMe ? "danger" : "primary"}
-          >
-            {profile.isFollowedByMe ? "Unfollow" : "Follow"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={toggleFollow}
+              disabled={followBusy}
+              variant={profile.isFollowedByMe ? "danger" : "primary"}
+            >
+              {profile.isFollowedByMe ? "Unfollow" : "Follow"}
+            </Button>
+
+            <Button
+              variant="ghost"
+              onClick={async () => {
+                try {
+                  const { chatApi } = await import("../../api/chatApi");
+                  const dm = await chatApi.getOrCreateDm(profile.userId);
+
+                  nav(`/app/messages/${dm.conversationId}`, {
+                    state: {
+                      peerUserId: profile.userId,
+                      peerUsername: profile.username,
+                      peerProfilePic: profile.profilePic,
+                    },
+                  });
+                } catch (err) {
+                  console.error("Create DM error:", err);
+                }
+              }}
+            >
+              Message
+            </Button>
+          </div>
         )}
         </div>
 

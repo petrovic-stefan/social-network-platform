@@ -18,6 +18,5 @@ export const registerSchema = z.object({
   password: z.string().min(6, "Lozinka mora imati bar 6 karaktera"),
 });
 
-
 export type LoginForm = z.input<typeof loginSchema>;
 export type RegisterForm = z.input<typeof registerSchema>;

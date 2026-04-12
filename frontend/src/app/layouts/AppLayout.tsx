@@ -35,7 +35,7 @@ function timeAgo(value?: string | null): string {
   const diffMs = Date.now() - d.getTime();
   const sec = Math.floor(diffMs / 1000);
 
-  if (sec < 10) return "just now";
+  if (sec < 10) return "upravo sada";
   if (sec < 60) return `${sec}s ago`;
 
   const min = Math.floor(sec / 60);
@@ -65,6 +65,32 @@ function notifEmoji(n: NotificationDto): string {
   return "🔔";
 }
 
+function notifTypeLabel(n: NotificationDto): string {
+  const t = (n.text ?? "").toLowerCase();
+  if (t.includes("like")) return "Like";
+  if (t.includes("comment")) return "Comment";
+  if (t.includes("follow")) return "Follow";
+  return "Notification";
+}
+
+function notifTypePillClass(n: NotificationDto): string {
+  const t = (n.text ?? "").toLowerCase();
+
+  if (t.includes("like")) {
+    return "border-pink-900/40 bg-pink-950/30 text-pink-300";
+  }
+
+  if (t.includes("comment")) {
+    return "border-sky-900/40 bg-sky-950/30 text-sky-300";
+  }
+
+  if (t.includes("follow")) {
+    return "border-emerald-900/40 bg-emerald-950/30 text-emerald-300";
+  }
+
+  return "border-neutral-800 bg-neutral-900 text-neutral-300";
+}
+
 function notifHref(n: NotificationDto): string | undefined {
   if (n.postId) return `/app/posts/${n.postId}`;
   if (n.fromUsername) return `/app/u/${n.fromUsername}`;
@@ -76,7 +102,9 @@ function makeToast(payload: NotificationPayload): Toast {
   const username = (payload.fromUsername ?? "someone").toString();
   const title = `${username}:`;
   const message = (payload.text ?? "Nova notifikacija").toString();
-  const time = payload.createdAt ? safeFormatDate(payload.createdAt) : new Date().toLocaleString("sr-RS");
+  const time = payload.createdAt
+    ? safeFormatDate(payload.createdAt)
+    : new Date().toLocaleString("sr-RS");
 
   const href =
     payload.postId
@@ -151,7 +179,10 @@ export default function AppLayout() {
   }, []);
 
   const { connected } = useNotifications(onRealtimeNotification);
-  const connDot = useMemo(() => (connected ? "bg-emerald-500" : "bg-red-500"), [connected]);
+  const connDot = useMemo(
+    () => (connected ? "bg-emerald-500" : "bg-red-500"),
+    [connected]
+  );
 
   useEffect(() => {
     (async () => {
@@ -202,6 +233,7 @@ export default function AppLayout() {
     }
 
     let cancelled = false;
+
     const timer = window.setTimeout(async () => {
       try {
         setSearchLoading(true);
@@ -263,12 +295,16 @@ export default function AppLayout() {
 
     const wasUnread = !n.isRead;
     if (wasUnread) {
-      setNotifItems((prev) => prev.map((x) => (sameItem(x, n) ? { ...x, isRead: true } : x)));
+      setNotifItems((prev) =>
+        prev.map((x) => (sameItem(x, n) ? { ...x, isRead: true } : x))
+      );
       setUnread((u) => Math.max(0, u - 1));
     }
 
     if (n.notificationId) {
-      notificationsApi.readOne(n.notificationId).catch((err) => console.log("readOne error:", err));
+      notificationsApi
+        .readOne(n.notificationId)
+        .catch((err) => console.log("readOne error:", err));
     }
 
     navigate(href);
@@ -288,9 +324,14 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <NotificationToasts items={toasts} onClose={(id) => setToasts((prev) => prev.filter((x) => x.id !== id))} />
+      <NotificationToasts
+        items={toasts}
+        onClose={(id) =>
+          setToasts((prev) => prev.filter((x) => x.id !== id))
+        }
+      />
 
-      <header className="flex items-center justify-between px-6 py-4 border-b border-neutral-800">
+      <header className="flex items-center justify-between border-b border-neutral-800 px-6 py-4">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate("/app")}
@@ -298,9 +339,12 @@ export default function AppLayout() {
           >
             SocialNetwork
           </button>
+
           <NavLink
             to="/app"
-            className={({ isActive }) => (isActive ? "text-blue-400" : "text-neutral-400 hover:text-white")}
+            className={({ isActive }) =>
+              isActive ? "text-blue-400" : "text-neutral-400 hover:text-white"
+            }
           >
             Feed
           </NavLink>
@@ -310,6 +354,14 @@ export default function AppLayout() {
             Realtime {connected ? "ON" : "OFF"}
           </div>
           <NavLink
+            to="/app/messages"
+            className={({ isActive }) =>
+              isActive ? "text-blue-400" : "text-neutral-400 hover:text-white"
+            }
+          >
+            Messages
+          </NavLink>
+          <NavLink
             to="/app/create"
             className={({ isActive }) =>
               isActive ? "text-blue-400" : "text-neutral-400 hover:text-white"
@@ -318,7 +370,7 @@ export default function AppLayout() {
             Create
           </NavLink>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <div className="relative w-[320px]" ref={searchBoxRef}>
             <input
@@ -332,7 +384,7 @@ export default function AppLayout() {
             />
 
             {searchOpen && (
-              <div className="absolute right-0 left-0 mt-2 rounded-2xl border border-neutral-800 bg-neutral-950 shadow-xl overflow-hidden z-[9999]">
+              <div className="absolute left-0 right-0 z-[9999] mt-2 overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-950 shadow-xl">
                 {searchLoading ? (
                   <div className="p-4 text-sm text-neutral-400">Searching...</div>
                 ) : searchItems.length === 0 ? (
@@ -346,10 +398,10 @@ export default function AppLayout() {
                       <button
                         key={u.userId}
                         onClick={() => openUser(u.username)}
-                        className="w-full px-4 py-3 text-left border-b border-neutral-900 hover:bg-neutral-900/40 transition"
+                        className="w-full border-b border-neutral-900 px-4 py-3 text-left hover:bg-neutral-900/40 transition"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full overflow-hidden border border-neutral-800 bg-neutral-900 shrink-0">
+                          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-neutral-800 bg-neutral-900">
                             {pic ? (
                               <img
                                 src={pic ?? undefined}
@@ -357,7 +409,7 @@ export default function AppLayout() {
                                 className="h-full w-full object-cover"
                               />
                             ) : (
-                              <div className="h-full w-full grid place-items-center text-xs text-neutral-500">
+                              <div className="grid h-full w-full place-items-center text-xs text-neutral-500">
                                 :)
                               </div>
                             )}
@@ -367,13 +419,13 @@ export default function AppLayout() {
                             <div className="text-sm font-semibold text-neutral-100">
                               @{u.username}
                             </div>
-                            <div className="text-xs text-neutral-400 truncate">
+                            <div className="truncate text-xs text-neutral-400">
                               {fullName || "User"}
                             </div>
                           </div>
 
                           {u.isFollowedByMe ? (
-                            <span className="text-[11px] rounded-full border border-emerald-900/40 bg-emerald-950/30 px-2 py-1 text-emerald-300">
+                            <span className="rounded-full border border-emerald-900/40 bg-emerald-950/30 px-2 py-1 text-[11px] text-emerald-300">
                               Following
                             </span>
                           ) : null}
@@ -394,27 +446,45 @@ export default function AppLayout() {
             >
               🔔
               {unread > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] rounded-full bg-red-600 px-1 text-[11px] text-white text-center">
+                <span className="absolute -top-1 -right-1 min-w-[18px] rounded-full bg-red-600 px-1 text-center text-[11px] text-white">
                   {unread > 99 ? "99+" : unread}
                 </span>
               )}
             </button>
 
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-[420px] rounded-2xl border border-neutral-800 bg-neutral-950 shadow-xl overflow-hidden z-[9999]">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
-                  <div className="text-sm font-semibold">Notifications</div>
-                  <button
-                    onClick={markAllRead}
-                    className="rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-200 hover:bg-neutral-800"
-                  >
-                    Mark all read
-                  </button>
+              <div className="absolute right-0 z-[9999] mt-2 w-[430px] overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-950 shadow-2xl">
+                <div className="border-b border-neutral-800 bg-neutral-950/95 px-4 py-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-semibold text-white">
+                        Notifications
+                      </div>
+                      <div className="mt-1 text-xs text-neutral-500">
+                        Aktivnosti vezane za tvoj profil i objave
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={markAllRead}
+                      className="rounded-xl border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-200 hover:bg-neutral-800"
+                    >
+                      Mark all read
+                    </button>
+                  </div>
                 </div>
 
-                <div className="max-h-[360px] overflow-auto">
+                <div className="max-h-[420px] overflow-auto">
                   {notifItems.length === 0 ? (
-                    <div className="p-4 text-sm text-neutral-400">Nema notifikacija.</div>
+                    <div className="px-6 py-10 text-center">
+                      <div className="text-3xl">🔔</div>
+                      <div className="mt-3 text-sm font-medium text-neutral-200">
+                        Nema notifikacija
+                      </div>
+                      <div className="mt-1 text-xs text-neutral-500">
+                        Kada neko lajkuje, komentariše ili te zaprati, videćeš to ovde.
+                      </div>
+                    </div>
                   ) : (
                     notifItems.map((n, idx) => {
                       const href = notifHref(n);
@@ -426,31 +496,68 @@ export default function AppLayout() {
                           onClick={() => clickable && openNotif(n)}
                           disabled={!clickable}
                           className={[
-                            "w-full text-left px-4 py-3 border-b border-neutral-900 transition",
-                            "hover:bg-neutral-900/40",
-                            n.isRead ? "opacity-70" : "bg-neutral-900/20",
-                            !clickable ? "cursor-default opacity-60" : "",
+                            "w-full border-b border-neutral-900/80 px-4 py-4 text-left transition",
+                            clickable ? "hover:bg-neutral-900/50" : "cursor-default opacity-60",
+                            n.isRead
+                              ? "bg-neutral-950"
+                              : "bg-neutral-900/25",
                           ].join(" ")}
                         >
-                          <div className="text-sm text-neutral-100 flex items-center gap-2">
-                            <span>{notifEmoji(n)}</span>
-                            {!n.isRead ? <span className="h-2 w-2 rounded-full bg-blue-500" /> : null}
+                          <div className="flex items-start gap-3">
+                            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-800 bg-neutral-900 text-lg">
+                              {notifEmoji(n)}
+                            </div>
 
-                            <span className="min-w-0">
-                              {n.fromUsername ? <span className="font-semibold">@{n.fromUsername} </span> : null}
-                              <span className="text-neutral-200">{notifText(n)}</span>
-                            </span>
-                          </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={[
+                                    "rounded-full border px-2 py-0.5 text-[10px] font-medium",
+                                    notifTypePillClass(n),
+                                  ].join(" ")}
+                                >
+                                  {notifTypeLabel(n)}
+                                </span>
 
-                          <div className="mt-1 text-xs text-neutral-500 flex items-center gap-2">
-                            <span>{timeAgo(n.createdAt)}</span>
-                            {n.createdAt ? <span>·</span> : null}
-                            <span>{safeFormatDate(n.createdAt)}</span>
+                                {!n.isRead ? (
+                                  <span className="h-2 w-2 rounded-full bg-blue-500" />
+                                ) : null}
+                              </div>
+
+                              <div className="mt-2 text-sm leading-5 text-neutral-100">
+                                {n.fromUsername ? (
+                                  <span className="font-semibold text-white">
+                                    @{n.fromUsername}
+                                  </span>
+                                ) : null}{" "}
+                                <span className="text-neutral-300">
+                                  {notifText(n)}
+                                </span>
+                              </div>
+
+                              <div className="mt-2 flex items-center gap-2 text-xs text-neutral-500">
+                                <span>{timeAgo(n.createdAt)}</span>
+                                {n.createdAt ? <span>•</span> : null}
+                                <span>{safeFormatDate(n.createdAt)}</span>
+                              </div>
+                            </div>
                           </div>
                         </button>
                       );
                     })
                   )}
+                </div>
+
+                <div className="border-t border-neutral-800 bg-neutral-950/95 px-4 py-3">
+                  <button
+                    onClick={() => {
+                      setNotifOpen(false);
+                      navigate("/app/notifications");
+                    }}
+                    className="w-full text-center text-xs text-neutral-400 hover:text-white"
+                  >
+                    View all notifications
+                  </button>
                 </div>
               </div>
             )}
@@ -463,7 +570,10 @@ export default function AppLayout() {
             Settings
           </button>
 
-          <button onClick={logout} className="text-sm text-red-400 hover:text-red-300">
+          <button
+            onClick={logout}
+            className="text-sm text-red-400 hover:text-red-300"
+          >
             Logout
           </button>
         </div>

@@ -11,7 +11,6 @@ export const http = axios.create({
   },
 });
 
-
 http.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -26,18 +25,16 @@ http.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-
 http.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     const status = error.response?.status;
 
     if (status === 401) {
+      // očisti auth
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem("userId");
       localStorage.removeItem("username");
-
-      
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";
       }

@@ -15,7 +15,6 @@ namespace SocialNetwork.API.Middleware
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
             var path = context.Request.Path.Value?.ToLower() ?? "";
-
             if (path.StartsWith("/api/auth") ||
                 path.StartsWith("/swagger") ||
                 path.StartsWith("/hubs"))

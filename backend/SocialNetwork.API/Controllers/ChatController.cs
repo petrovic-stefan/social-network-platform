@@ -4,6 +4,7 @@ using SocialNetwork.API.Auth;
 using SocialNetwork.Application.Chat;
 using Microsoft.AspNetCore.SignalR;
 using SocialNetwork.API.Hubs;
+
 namespace SocialNetwork.API.Controllers
 {
     [ApiController]
@@ -12,7 +13,6 @@ namespace SocialNetwork.API.Controllers
     public class ChatController : ControllerBase
     {
         private readonly IChatService _chat;
-
         private readonly IHubContext<ChatHub> _hub;
 
         public ChatController(IChatService chat, IHubContext<ChatHub> hub)
@@ -36,7 +36,6 @@ namespace SocialNetwork.API.Controllers
             return Ok(await _chat.GetInboxAsync(userId));
         }
 
-
         [HttpGet("{conversationId:int}/messages")]
         public async Task<IActionResult> Messages(int conversationId, [FromQuery] int take = 50)
         {
@@ -51,22 +50,26 @@ namespace SocialNetwork.API.Controllers
 
             try
             {
-                var messageId = await _chat.SendMessageAsync(conversationId, userId, req.Text);
+                var text = (req.Text ?? string.Empty).Trim();
 
-                var last = (await _chat.GetMessagesAsync(conversationId, userId, take: 1)).First();
-                var toUserId = last.To_Users_Id;
+                if (string.IsNullOrWhiteSpace(text))
+                    return BadRequest(new { error = "Message text is required." });
 
-                if (toUserId.HasValue)
+                var messageId = await _chat.SendMessageAsync(conversationId, userId, text);
+
+                var peerUserId = await _chat.GetDmPeerUserAsync(conversationId, userId);
+
+                if (peerUserId.HasValue)
                 {
-                    await _hub.Clients.Group($"user:{toUserId.Value}")
+                    await _hub.Clients.Group($"user:{peerUserId.Value}")
                         .SendAsync("chat:message", new
                         {
-                            messageId = last.Messages_Id,
-                            conversationId = last.Conversation_Id,
-                            fromUserId = last.From_Users_Id,
-                            toUserId = last.To_Users_Id,
-                            text = last.Message_Text,
-                            sentAt = last.Sent_At
+                            messageId = messageId,
+                            conversationId = conversationId,
+                            fromUserId = userId,
+                            toUserId = peerUserId.Value,
+                            text = text,
+                            sentAt = DateTime.UtcNow
                         });
                 }
 
@@ -99,6 +102,7 @@ namespace SocialNetwork.API.Controllers
 
             return Ok(new { message = "Marked as read" });
         }
+
         [HttpDelete("messages/{messageId:int}")]
         public async Task<IActionResult> DeleteMessage(int messageId)
         {
@@ -129,7 +133,5 @@ namespace SocialNetwork.API.Controllers
 
             return Ok(new { markedCount = marked });
         }
-
-
     }
 }
